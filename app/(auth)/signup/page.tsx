@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/app/lib/supabase";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { createClient } from "@/app/lib/supabase/client";
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -26,15 +26,15 @@ export default function SignupPage() {
     e.preventDefault();
     setError(null);
 
-    const { error } = await supabase.auth.signUp({
+    const supabase = createClient();
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
     });
 
     if (error) {
       setError(error.message);
-    } else {
-      // Optionally, redirect to a page that tells the user to check their email
+    } else if (data?.user) {
       router.push("/login?message=Check your email for a confirmation link");
     }
   };

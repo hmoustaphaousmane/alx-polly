@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Session, User } from "@supabase/supabase-js";
-import { supabase } from "./supabase";
+import { createClient } from "@/app/lib/supabase/client";
 
 interface AuthContextType {
   session: Session | null;
@@ -19,6 +19,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const getSession = async () => {
+      const supabase = createClient();
       const { data, error } = await supabase.auth.getSession();
       if (error) {
         console.error("Error getting session:", error);
@@ -31,8 +32,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     getSession();
 
+    const supabase = createClient();
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (_event, session) => {
         setSession(session);
         setUser(session?.user || null);
         setLoading(false);

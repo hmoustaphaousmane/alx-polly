@@ -28,6 +28,18 @@ import { useState } from "react";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { createPoll } from "@/app/lib/actions";
+import { useFormStatus } from "react-dom";
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <Button type="submit" className="w-full mt-6" aria-disabled={pending}>
+      {pending ? "Creating Poll..." : "Create Poll"}
+    </Button>
+  );
+}
 
 export default function CreatePollPage() {
   const [options, setOptions] = useState(["", ""]);
@@ -53,87 +65,95 @@ export default function CreatePollPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="basic">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="basic">Basic Information</TabsTrigger>
-              <TabsTrigger value="settings">Settings</TabsTrigger>
-            </TabsList>
-            <TabsContent value="basic" className="mt-4">
-              <div className="grid gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="title">Poll Title</Label>
-                  <Input id="title" placeholder="What's your favorite color?" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="description">Description (Optional)</Label>
-                  <Textarea
-                    id="description"
-                    placeholder="A brief description of your poll."
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label>Poll Options</Label>
-                  {options.map((option, index) => (
-                    <Input
-                      key={index}
-                      value={option}
-                      onChange={(e) => handleOptionChange(index, e.target.value)}
-                      placeholder={`Option ${index + 1}`}
+          <form action={createPoll}>
+            <Tabs defaultValue="basic">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="basic">Basic Information</TabsTrigger>
+                <TabsTrigger value="settings">Settings</TabsTrigger>
+              </TabsList>
+              <TabsContent value="basic" className="mt-4">
+                <div className="grid gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="question">Poll Title</Label>
+                    <Input id="question" name="question" placeholder="What's your favorite color?" required />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="description">Description (Optional)</Label>
+                    <Textarea
+                      id="description"
+                      name="description"
+                      placeholder="A brief description of your poll."
                     />
-                  ))}
-                  <Button
-                    variant="outline"
-                    onClick={handleAddOption}
-                    className="mt-2"
-                  >
-                    Add Option
-                  </Button>
-                </div>
-              </div>
-            </TabsContent>
-            <TabsContent value="settings" className="mt-4">
-              <div className="grid gap-4">
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="multiple-options" />
-                  <Label htmlFor="multiple-options">
-                    Allow users to select multiple options
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="require-login" />
-                  <Label htmlFor="require-login">
-                    Require users to be logged in to vote
-                  </Label>
-                </div>
-                <div className="grid gap-2">
-                  <Label>Poll End Date (Optional)</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-[280px] justify-start text-left font-normal",
-                          !date && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {date ? format(date, "PPP") : <span>Pick a date</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={date}
-                        onSelect={setDate}
-                        initialFocus
+                  </div>
+                  <div className="grid gap-2">
+                    <Label>Poll Options</Label>
+                    {options.map((option, index) => (
+                      <Input
+                        key={index}
+                        name="option"
+                        value={option}
+                        onChange={(e) => handleOptionChange(index, e.target.value)}
+                        placeholder={`Option ${index + 1}`}
+                        required={index < 2} // Require at least two options
                       />
-                    </PopoverContent>
-                  </Popover>
+                    ))}
+                    <Button
+                      variant="outline"
+                      onClick={handleAddOption}
+                      className="mt-2"
+                      type="button"
+                    >
+                      Add Option
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </TabsContent>
-          </Tabs>
-          <Button className="w-full mt-6">Create Poll</Button>
+              </TabsContent>
+              <TabsContent value="settings" className="mt-4">
+                <div className="grid gap-4">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="multiple-options" name="allowMultipleOptions" />
+                    <Label htmlFor="multiple-options">
+                      Allow users to select multiple options
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox id="require-login" name="requireLogin" />
+                    <Label htmlFor="require-login">
+                      Require users to be logged in to vote
+                    </Label>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label>Poll End Date (Optional)</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-[280px] justify-start text-left font-normal",
+                            !date && "text-muted-foreground"
+                          )}
+                          type="button"
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {date ? format(date, "PPP") : <span>Pick a date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={date}
+                          onSelect={setDate}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    {date && <input type="hidden" name="endDate" value={date.toISOString()} />}
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+            <SubmitButton />
+          </form>
         </CardContent>
       </Card>
     </div>
