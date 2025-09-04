@@ -9,10 +9,10 @@ import {
 import Link from "next/link";
 import { createClient } from '../lib/supabase/server'
 import { cookies } from 'next/headers'
-import { Database } from '../lib/supabase/database.types'
+import { Database } from '@/app/lib/supabase/database.types'
 import { deletePoll } from "@/app/lib/actions";
 import { Button } from "@/components/ui/button";
-import { clearPollCreationSuccessCookie } from '../lib/actions'
+import { clearPollCreationSuccessCookie, clearPollUpdateSuccessCookie } from '../lib/actions'
 import { DeletePollButton } from "@/components/DeletePollButton";
 
 type Poll = Database['public']['Tables']['polls']['Row']
@@ -32,8 +32,12 @@ export default async function PollsPage() {
   const userId = userData?.user?.id;
 
   const successMessage = (cookieStore as any).get("poll_creation_success")?.value;
+  const updateSuccessMessage = (cookieStore as any).get("poll_update_success")?.value;
   if (successMessage) {
     clearPollCreationSuccessCookie();
+  }
+  if (updateSuccessMessage) {
+    clearPollUpdateSuccessCookie();
   }
 
   return (
@@ -41,6 +45,11 @@ export default async function PollsPage() {
       {successMessage && (
         <div className="mb-6 p-4 bg-green-100 text-green-800 rounded-md">
           {successMessage}
+        </div>
+      )}
+      {updateSuccessMessage && (
+        <div className="mb-6 p-4 bg-green-100 text-green-800 rounded-md">
+          {updateSuccessMessage}
         </div>
       )}
       <h1 className="text-3xl font-bold mb-6">Available Polls</h1>

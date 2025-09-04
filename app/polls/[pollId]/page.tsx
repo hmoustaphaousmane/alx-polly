@@ -12,6 +12,7 @@ import { createClient } from "@/app/lib/supabase/server";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { vote } from "@/app/lib/actions";
+import React from "react";
 
 export default async function PollPage({ params }: any) {
   const cookieStore = cookies();
