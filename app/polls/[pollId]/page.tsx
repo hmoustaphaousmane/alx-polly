@@ -13,13 +13,9 @@ import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { vote } from "@/app/lib/actions";
 
-interface PollPageProps {
-  params: { pollId: string };
-}
-
-export default async function PollPage({ params }: PollPageProps) {
+export default async function PollPage({ params }: any) {
   const cookieStore = cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = await createClient(cookieStore);
 
   const { data: poll, error } = await supabase
     .from("polls")

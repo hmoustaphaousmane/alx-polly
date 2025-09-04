@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/app/lib/supabase/server";
 
 export async function createPoll(formData: FormData) {
-  const supabase = createClient(cookies());
+  const supabase = await createClient(cookies());
   const question = formData.get("question")?.toString() || "";
   const description = formData.get("description")?.toString() || null;
   const options = formData.getAll("option").map(opt => opt.toString());
@@ -69,7 +69,7 @@ export async function clearPollCreationSuccessCookie() {
 }
 
 export async function vote(formData: FormData) {
-  const supabase = createClient(cookies());
+  const supabase = await createClient(cookies());
   const pollId = formData.get("pollId")?.toString();
   const selectedOption = formData.get("selectedOption")?.toString();
 
@@ -111,7 +111,7 @@ export async function vote(formData: FormData) {
 }
 
 export async function deletePoll(formData: FormData) {
-  const supabase = createClient(cookies());
+  const supabase = await createClient(cookies());
   const pollId = formData.get("pollId")?.toString();
 
   if (!pollId) {
@@ -146,4 +146,11 @@ export async function deletePoll(formData: FormData) {
 
   revalidatePath("/polls");
   redirect("/polls");
+}
+
+export async function logout() {
+  const supabase = await createClient(cookies());
+  await supabase.auth.signOut();
+  revalidatePath("/");
+  redirect("/login");
 }

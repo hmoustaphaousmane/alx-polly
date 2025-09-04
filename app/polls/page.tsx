@@ -13,13 +13,14 @@ import { Database } from '../lib/supabase/database.types'
 import { deletePoll } from "@/app/lib/actions";
 import { Button } from "@/components/ui/button";
 import { clearPollCreationSuccessCookie } from '../lib/actions'
+import { DeletePollButton } from "@/components/DeletePollButton";
 
 type Poll = Database['public']['Tables']['polls']['Row']
 type PollWithVoteCount = Poll & { votes: [{ count: number }] }
 
 export default async function PollsPage() {
   const cookieStore = cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = await createClient(cookieStore);
   const { data: polls, error } = await supabase
     .from("polls")
     .select(
@@ -67,10 +68,7 @@ export default async function PollsPage() {
                   <Link href={`/polls/edit/${poll.id}`}>
                     <Button variant="outline" size="sm">Edit</Button>
                   </Link>
-                  <form action={deletePoll}>
-                    <input type="hidden" name="pollId" value={poll.id} />
-                    <Button variant="destructive" size="sm" type="submit">Delete</Button>
-                  </form>
+                  <DeletePollButton pollId={poll.id} />
                 </div>
               )}
             </CardFooter>
